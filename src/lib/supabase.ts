@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 
 // Browser-safe client using anon key
 export const supabaseBrowser = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy'
 );
 
 // Server-only client using service role key (bypasses RLS)
