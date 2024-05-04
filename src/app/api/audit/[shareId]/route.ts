@@ -3,16 +3,17 @@ import { getSupabaseServer } from '@/lib/supabase';
 
 export async function GET(
   req: Request,
-  { params }: { params: { shareId: string } }
+  { params }: { params: Promise<{ shareId: string }> }
 ) {
   try {
     const supabase = getSupabaseServer();
+    const { shareId } = await params;
     
     // audits table has public read by share_id RLS policy
     const { data, error } = await supabase
       .from('audits')
       .select('share_id, tools, team_size, use_case, total_monthly_savings, total_annual_savings, ai_summary, created_at')
-      .eq('share_id', params.shareId)
+      .eq('share_id', shareId)
       .single();
 
     if (error) {

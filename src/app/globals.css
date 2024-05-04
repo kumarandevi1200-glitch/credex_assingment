@@ -1,26 +1,38 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 240 20% 5%; /* #0A0A0F */
+    --foreground: 0 0% 100%;
+    --card: 240 16% 9%; /* #13131A */
+    --card-foreground: 0 0% 100%;
+    --primary: 162 100% 45%; /* #00E5A0 */
+    --primary-foreground: 240 20% 5%;
+    --secondary: 240 10% 15%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 10% 15%;
+    --muted-foreground: 240 10% 65%;
+    --accent: 162 100% 45%;
+    --accent-foreground: 240 20% 5%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 10% 20%;
+    --input: 240 10% 20%;
+    --ring: 162 100% 45%;
+    --radius: 0.5rem;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+
+
+/* Custom Utilities for the specific UI vibe */
+@layer utilities {
+  .text-savings {
+    color: #00E5A0;
+  }
+  .bg-savings {
+    background-color: #00E5A0;
+  }
 }
