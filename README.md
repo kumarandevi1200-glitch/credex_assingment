@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SpendLens — AI Spend Audit Tool
 
-## Getting Started
+> Find out where your AI budget is going. Free, no login required.
 
-First, run the development server:
+SpendLens is a free web app for startup founders and engineering managers to audit their AI tool subscriptions, identify overspend, and get a personalized savings report in 30 seconds.
+
+**Built for:** CTOs and EMs at 5–30 person startups paying for 3+ AI tools without a clear benchmark.
+
+## Screenshots / Demo
+[INSERT: 3 screenshots of form, results page, and share URL OR 30-second Loom/YouTube link]
+
+## Live Demo
+🔗 [INSERT deployed URL]
+
+## Quick Start
 
 ```bash
+git clone https://github.com/[YOUR_HANDLE]/spendlens
+cd spendlens
+npm install
+cp .env.example .env.local
+# Fill in env vars (see Environment Variables section)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables
+| Variable | Description |
+|---|---|
+| NEXT_PUBLIC_SUPABASE_URL | Your Supabase project URL |
+| NEXT_PUBLIC_SUPABASE_ANON_KEY | Supabase anon key |
+| SUPABASE_SERVICE_ROLE_KEY | Supabase service role key (server only) |
+| ANTHROPIC_API_KEY | Anthropic API key |
+| RESEND_API_KEY | Resend API key |
+| NEXT_PUBLIC_BASE_URL | Your deployed URL |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Deploy to Vercel
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+Set all env vars in Vercel dashboard. Connect Supabase via Vercel integration.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Decisions
 
-## Learn More
+Five real trade-offs made during this build:
 
-To learn more about Next.js, take a look at the following resources:
+1. **Next.js App Router over Pages Router** — [FILL IN REAL REASONING ~2 sentences]
+2. **Supabase over Firebase** — [FILL IN REAL REASONING ~2 sentences]  
+3. **Deterministic audit rules over AI-generated recommendations** — The audit logic uses hardcoded rules rather than asking an LLM what to recommend. AI is only used for the final summary paragraph. This makes the audit auditable, predictable, and defensible to a finance person. An LLM recommending tools it was trained on promotional data about is not trustworthy for financial advice.
+4. **Email-after-value, not before** — [FILL IN REAL REASONING ~2 sentences]
+5. **[FILL IN YOUR 5TH REAL DECISION]** — [FILL IN REAL REASONING]
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Running Tests
+```bash
+npm run test        # run all tests
+npm run test:ui     # vitest UI
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+MIT — use it, fork it, put it in your portfolio.
