@@ -128,7 +128,7 @@ End with one actionable next step.`;
       
       clearTimeout(timeoutId);
       
-      aiSummary = (message.content[0] as any).text;
+      aiSummary = (message.content[0] as unknown as { text: string }).text;
     } catch (e) {
       console.error('Anthropic API error', e);
       aiSummary = generateFallbackSummary(auditResult);

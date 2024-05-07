@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Copy, Check, Share2 } from 'lucide-react';
 
 export function ShareButton({ shareId }: { shareId: string }) {
@@ -8,11 +8,10 @@ export function ShareButton({ shareId }: { shareId: string }) {
   const [baseUrl, setBaseUrl] = useState('');
   
   // Get URL on mount to avoid hydration mismatch
-  import('react').then(React => {
-    React.useEffect(() => {
-      setBaseUrl(window.location.origin);
-    }, []);
-  });
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setBaseUrl(window.location.origin);
+  }, []);
 
   const url = `${baseUrl}/audit/${shareId}`;
 

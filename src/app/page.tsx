@@ -16,12 +16,13 @@ export default function Home() {
   const [useCase, setUseCase] = useState<'coding' | 'writing' | 'data' | 'research' | 'mixed'>('mixed');
   
   // Tool state maps toolId -> { enabled, planId, seats, monthlySpend }
-  const [toolsState, setToolsState] = useState<Record<string, any>>({});
+  const [toolsState, setToolsState] = useState<Record<string, { enabled: boolean; planId: string; seats: number; monthlySpend: number }>>({});
   const [isClient, setIsClient] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize tool state
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsClient(true);
     
     // Load from local storage
@@ -29,19 +30,22 @@ export default function Home() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+         
         if (parsed.teamSize) setTeamSize(parsed.teamSize);
+         
         if (parsed.useCase) setUseCase(parsed.useCase);
         if (parsed.toolsState) {
+           
           setToolsState(parsed.toolsState);
           return;
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
     
     // Default setup
-    const initial: Record<string, any> = {};
+    const initial: Record<string, { enabled: boolean; planId: string; seats: number; monthlySpend: number }> = {};
     Object.keys(PRICING_DATA).forEach(id => {
       const tool = PRICING_DATA[id];
       const defaultPlanId = Object.keys(tool.plans)[0];
@@ -52,6 +56,7 @@ export default function Home() {
         monthlySpend: tool.plans[defaultPlanId]?.pricePerSeat || 0
       };
     });
+     
     setToolsState(initial);
   }, []);
 
@@ -66,7 +71,7 @@ export default function Home() {
     }
   }, [teamSize, useCase, toolsState, isClient]);
 
-  const handleToolUpdate = (toolId: string, field: string, value: any) => {
+  const handleToolUpdate = (toolId: string, field: string, value: string | number | boolean) => {
     setToolsState(prev => {
       const next = { ...prev };
       const current = next[toolId];
@@ -75,8 +80,8 @@ export default function Home() {
       
       // Auto-calculate spend if plan or seats change
       if (field === 'planId' || field === 'seats') {
-        const pId = field === 'planId' ? value : current.planId;
-        const s = field === 'seats' ? value : current.seats;
+        const pId = (field === 'planId' ? value : current.planId) as string;
+        const s = (field === 'seats' ? value : current.seats) as number;
         const price = PRICING_DATA[toolId].plans[pId]?.pricePerSeat || 0;
         newSpend = price * s;
       }
@@ -139,7 +144,7 @@ export default function Home() {
       }
 
       router.push(`/audit/${data.shareId}`);
-    } catch (err) {
+    } catch {
       toast.error("Something went wrong processing your audit.");
       setIsSubmitting(false);
     }
@@ -189,7 +194,7 @@ export default function Home() {
               <label className="block text-sm font-medium text-gray-300 mb-2">Primary Use Case</label>
               <select 
                 value={useCase}
-                onChange={(e) => setUseCase(e.target.value as any)}
+                onChange={(e) => setUseCase(e.target.value as 'coding' | 'writing' | 'data' | 'research' | 'mixed')}
                 className="w-full bg-[#13131A] border border-[#202028] rounded-md px-4 py-3 text-white focus:outline-none focus:border-[#00E5A0]"
               >
                 <option value="coding">Coding / Engineering</option>
@@ -231,7 +236,7 @@ export default function Home() {
         <section className="space-y-6 pt-6">
           <div className="bg-[#13131A] border border-[#00E5A0]/30 rounded-xl p-6 text-center">
             <h3 className="text-xl font-medium mb-2">Ready to audit?</h3>
-            <p className="text-gray-400 mb-6">You've selected {Object.keys(toolsState).filter(id => toolsState[id].enabled).length} tools totaling ${totalMonthlyCalculated}/mo.</p>
+            <p className="text-gray-400 mb-6">You&apos;ve selected {Object.keys(toolsState).filter(id => toolsState[id].enabled).length} tools totaling ${totalMonthlyCalculated}/mo.</p>
             
             {/* Honeypot */}
             <input

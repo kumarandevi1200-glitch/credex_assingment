@@ -1,31 +1,23 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0A0A0F;
+  --color-foreground: #ffffff;
+  --color-card: #13131A;
+  --color-card-foreground: #ffffff;
+  --color-primary: #00E5A0;
+  --color-primary-foreground: #0A0A0F;
+  --color-border: #333340;
+  --color-input: #333340;
+  --color-ring: #00E5A0;
+}
 
 @layer base {
   :root {
-    --background: 240 20% 5%; /* #0A0A0F */
-    --foreground: 0 0% 100%;
-    --card: 240 16% 9%; /* #13131A */
-    --card-foreground: 0 0% 100%;
-    --primary: 162 100% 45%; /* #00E5A0 */
-    --primary-foreground: 240 20% 5%;
-    --secondary: 240 10% 15%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 240 10% 15%;
-    --muted-foreground: 240 10% 65%;
-    --accent: 162 100% 45%;
-    --accent-foreground: 240 20% 5%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 240 10% 20%;
-    --input: 240 10% 20%;
-    --ring: 162 100% 45%;
-    --radius: 0.5rem;
+    --background: #0A0A0F;
+    --foreground: #ffffff;
   }
 }
-
-
 
 /* Custom Utilities for the specific UI vibe */
 @layer utilities {

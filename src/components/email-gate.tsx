@@ -42,7 +42,7 @@ export function EmailGate({ auditId, isOptimal }: { auditId: string, isOptimal: 
       } else {
         toast.error('Something went wrong. Please try again.');
       }
-    } catch (err) {
+    } catch {
       toast.error('Failed to submit. Please check your connection.');
     } finally {
       setLoading(false);
@@ -79,7 +79,7 @@ export function EmailGate({ auditId, isOptimal }: { auditId: string, isOptimal: 
           <p className="text-gray-400 text-sm">
             {isOptimal 
               ? "Drop your email to get notified if pricing changes or better alternatives emerge for your stack."
-              : "We'll email you a copy of this report. If your savings are substantial, we can help you capture them."}
+              : "We&apos;ll email you a copy of this report. If your savings are substantial, we can help you capture them."}
           </p>
         </div>
 
@@ -116,7 +116,7 @@ export function EmailGate({ auditId, isOptimal }: { auditId: string, isOptimal: 
           </button>
           
           <p className="text-xs text-center text-gray-500 mt-4">
-            We'll never share your data. Unsubscribe anytime.
+            We&apos;ll never share your data. Unsubscribe anytime.
           </p>
         </form>
       </div>

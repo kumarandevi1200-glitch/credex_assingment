@@ -131,7 +131,7 @@ export function runAudit(inputs: UserToolInput[], teamSize: number, useCase: str
 
     if (input.toolId === 'claude' && input.planId === 'max' && input.useCase !== 'writing') {
        const proPlan = tool.plans['pro'];
-       const idealSpend = safeSeats * proPlan.pricePerSeat;
+       const idealSpend = optimalSeats * proPlan.pricePerSeat;
        const savings = safeSpend - idealSpend;
        if (savings > 0 && finding.monthlySavings < savings) {
           finding = {
@@ -149,7 +149,7 @@ export function runAudit(inputs: UserToolInput[], teamSize: number, useCase: str
 
     if (input.toolId === 'copilot' && input.planId === 'enterprise' && safeTeamSize < 50) {
        const bizPlan = tool.plans['business'];
-       const idealSpend = safeSeats * bizPlan.pricePerSeat;
+       const idealSpend = optimalSeats * bizPlan.pricePerSeat;
        const savings = safeSpend - idealSpend;
        if (savings > 0 && finding.monthlySavings < savings) {
           finding = {

@@ -84,7 +84,7 @@ export default async function AuditResultPage({ params }: { params: Promise<{ sh
         <section className="mb-16">
           <div className="bg-[#13131A] border-l-4 border-[#00E5A0] p-6 rounded-r-lg">
             <p className="text-lg text-gray-200 leading-relaxed font-serif italic">
-              "{data.ai_summary.replace(/<[^>]*>?/gm, '')}"
+              &quot;{data.ai_summary.replace(/<[^>]*>?/gm, '')}&quot;
             </p>
           </div>
         </section>
@@ -94,7 +94,7 @@ export default async function AuditResultPage({ params }: { params: Promise<{ sh
       {result.totalMonthlySavings > 500 && (
         <section className="mb-16 bg-[#0A1A14] border border-[#00E5A0] rounded-xl p-8 text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00E5A0] to-transparent"></div>
-          <h2 className="text-2xl font-bold mb-3">You're leaving ${result.totalMonthlySavings}/mo on the table.</h2>
+          <h2 className="text-2xl font-bold mb-3">You&apos;re leaving ${result.totalMonthlySavings}/mo on the table.</h2>
           <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
             Credex sources discounted AI credits from companies that overforecast. 
             We can help you instantly cut these costs without changing tools.
@@ -108,7 +108,7 @@ export default async function AuditResultPage({ params }: { params: Promise<{ sh
       {/* Already Optimal */}
       {isOptimal && (
         <section className="mb-16 text-center border border-[#202028] bg-[#13131A] p-8 rounded-xl">
-          <h2 className="text-2xl font-bold mb-2">You're spending well. Seriously.</h2>
+          <h2 className="text-2xl font-bold mb-2">You&apos;re spending well. Seriously.</h2>
           <p className="text-gray-400">Your AI stack is lean and appropriate for your team size.</p>
         </section>
       )}
