@@ -112,6 +112,10 @@ Be direct, specific, and slightly provocative. No fluff. No "great news!" opener
 If savings are minimal, say so honestly. If they're substantial, be concrete about the dollar amount.
 End with one actionable next step.`;
 
+      if (!process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY === 'your_anthropic_api_key_here') {
+        throw new Error('Anthropic API key not configured');
+      }
+
       const client = new Anthropic({
         apiKey: process.env.ANTHROPIC_API_KEY,
       });

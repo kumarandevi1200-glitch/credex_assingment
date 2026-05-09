@@ -45,3 +45,7 @@ CREATE POLICY "Service role insert audits"
 -- leads: insert via service role only
 CREATE POLICY "Service role insert leads"
   ON leads FOR INSERT WITH CHECK (auth.role() = 'service_role');
+
+-- rate_limits: full access via service role
+CREATE POLICY "Service role all rate_limits"
+  ON rate_limits FOR ALL USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');

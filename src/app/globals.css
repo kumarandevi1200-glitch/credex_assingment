@@ -1,30 +1,46 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0A0A0F;
-  --color-foreground: #ffffff;
-  --color-card: #13131A;
-  --color-card-foreground: #ffffff;
-  --color-primary: #00E5A0;
-  --color-primary-foreground: #0A0A0F;
-  --color-border: #333340;
-  --color-input: #333340;
-  --color-ring: #00E5A0;
+  --color-ink: #0A0A10; /* Deeper, richer black */
+  --color-paper: #FAFAFA; /* Cleaner white */
+  --color-paper-dim: #F2F2F5; /* Sleek subtle gray */
+  --color-savings: #00E5A0; /* Vibrant mint green */
+  --color-warn: #FF5A36; /* Vibrant coral */
+  --color-accent: #3B82F6; /* Vibrant blue */
+  --color-rule: #E5E7EB; /* Softer borders */
+  --color-muted: #6B7280; /* Clean gray text */
+  
+  --shadow-soft: 0 4px 20px rgba(0,0,0,0.03);
+  --shadow-glow: 0 0 20px rgba(0, 229, 160, 0.15);
+  --shadow-elevated: 0 10px 40px rgba(0,0,0,0.08);
+
+  --font-sans: var(--font-instrument-sans), sans-serif;
+  --font-serif: var(--font-playfair), serif;
+  --font-mono: var(--font-dm-mono), monospace;
 }
 
 @layer base {
   :root {
-    --background: #0A0A0F;
-    --foreground: #ffffff;
+    --background: var(--color-paper);
+    --foreground: var(--color-ink);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
   }
 }
 
-/* Custom Utilities for the specific UI vibe */
+/* Base resets & specific utilities */
 @layer utilities {
-  .text-savings {
-    color: #00E5A0;
+  input[type=number]::-webkit-inner-spin-button, 
+  input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
   }
-  .bg-savings {
-    background-color: #00E5A0;
+  input[type=number] {
+    -moz-appearance: textfield;
   }
 }

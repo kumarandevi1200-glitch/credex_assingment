@@ -1,11 +1,26 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, DM_Serif_Display } from "next/font/google";
+import { Playfair_Display, DM_Mono, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from 'sonner';
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
-const dmSerif = DM_Serif_Display({ weight: "400", subsets: ["latin"], variable: "--font-dm-serif" });
+const playfair = Playfair_Display({ 
+  subsets: ["latin"], 
+  style: ['normal', 'italic'],
+  weight: ['400', '500', '600', '700'],
+  variable: "--font-playfair" 
+});
+
+const dmMono = DM_Mono({ 
+  subsets: ["latin"], 
+  weight: ["400", "500"], 
+  variable: "--font-dm-mono" 
+});
+
+const instrumentSans = Instrument_Sans({ 
+  subsets: ["latin"], 
+  weight: ["400", "500", "600"], 
+  variable: "--font-instrument-sans" 
+});
 
 export const metadata: Metadata = {
   title: "SpendLens — AI Spend Audit Tool",
@@ -18,10 +33,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.variable} ${jetbrains.variable} ${dmSerif.variable} font-sans bg-[#0A0A0F] text-white min-h-screen`}>
+    <html lang="en">
+      <body className={`${playfair.variable} ${dmMono.variable} ${instrumentSans.variable} font-sans min-h-screen selection:bg-accent selection:text-white`}>
         {children}
-        <Toaster theme="dark" />
+        <Toaster theme="light" />
       </body>
     </html>
   );

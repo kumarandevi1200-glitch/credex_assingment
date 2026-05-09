@@ -1,125 +1,147 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { z } from 'zod';
-import { X, Mail, ArrowRight } from 'lucide-react';
-import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 
-export function EmailGate({ auditId, isOptimal }: { auditId: string, isOptimal: boolean }) {
+export function EmailGate({ auditId, isOptimal }: { auditId: string; isOptimal: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [email, setEmail] = useState('');
-  const [company, setCompany] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
-    // Auto-trigger after 30 seconds
+    // Listen for custom event from the "Save This Report" button
+    const handleTrigger = () => {
+      if (!isDismissed) setIsOpen(true);
+    };
+    window.addEventListener('spendlens-trigger-email', handleTrigger);
+    
+    // Timer trigger
     const timer = setTimeout(() => {
-      if (!submitted) setIsOpen(true);
-    }, 30000);
-    return () => clearTimeout(timer);
-  }, [submitted]);
+      if (!isDismissed && status === 'idle') setIsOpen(true);
+    }, 45000);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    return () => {
+      window.removeEventListener('spendlens-trigger-email', handleTrigger);
+      clearTimeout(timer);
+    };
+  }, [isDismissed, status]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!z.string().email().safeParse(email).success) {
-      toast.error('Please enter a valid email address.');
-      return;
-    }
-
-    setLoading(true);
+    setStatus('loading');
+    
+    const fd = new FormData(e.currentTarget);
+    const email = fd.get('email') as string;
+    const company = fd.get('company') as string;
+    const role = fd.get('role') as string;
+    
     try {
       const res = await fetch('/api/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ auditId, email, companyName: company })
+        body: JSON.stringify({ email, company, role, auditId })
       });
       
-      if (res.ok) {
-        setSubmitted(true);
+      if (!res.ok) throw new Error();
+      setStatus('success');
+      
+      setTimeout(() => {
         setIsOpen(false);
-        toast.success("Saved! Check your inbox. We'll reach out if we found significant savings.");
-      } else {
-        toast.error('Something went wrong. Please try again.');
-      }
+        setIsDismissed(true);
+      }, 2500);
+      
     } catch {
-      toast.error('Failed to submit. Please check your connection.');
-    } finally {
-      setLoading(false);
+      setStatus('error');
+      // Briefly show error then revert
+      setTimeout(() => setStatus('idle'), 3000);
     }
   };
 
-  if (!isOpen) {
-    if (submitted) return null;
-    return (
-      <button 
-        onClick={() => setIsOpen(true)}
-        className="w-full py-4 border border-[#202028] bg-[#13131A] hover:bg-[#1A1A24] rounded-lg flex flex-col items-center justify-center gap-2 transition-colors mt-8"
-      >
-        <Mail className="w-5 h-5 text-gray-400" />
-        <span className="font-medium">
-          {isOptimal ? 'Notify me when optimizations apply to my stack' : 'Save this report & discuss savings'}
-        </span>
-      </button>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#13131A] border border-[#202028] rounded-xl w-full max-w-md p-6 relative animate-in fade-in zoom-in-95 duration-200">
-        <button 
-          onClick={() => setIsOpen(false)}
-          className="absolute right-4 top-4 text-gray-500 hover:text-white"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-paper)] border-t border-[var(--color-rule)] shadow-2xl"
+          style={{ maxHeight: '320px' }}
         >
-          <X className="w-5 h-5" />
-        </button>
-        
-        <div className="mb-6">
-          <h2 className="text-xl font-bold font-serif mb-2">Save Your Audit</h2>
-          <p className="text-gray-400 text-sm">
-            {isOptimal 
-              ? "Drop your email to get notified if pricing changes or better alternatives emerge for your stack."
-              : "We&apos;ll email you a copy of this report. If your savings are substantial, we can help you capture them."}
-          </p>
-        </div>
+          <div className="max-w-[560px] mx-auto px-6 py-8 relative">
+            <button 
+              onClick={() => { setIsOpen(false); setIsDismissed(true); }}
+              className="absolute top-4 right-4 text-[var(--color-muted)] hover:text-[var(--color-ink)] p-2"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M13 1L1 13M1 1L13 13" />
+              </svg>
+            </button>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Work Email</label>
-            <input 
-              type="email" 
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="founder@startup.com"
-              className="w-full bg-[#0A0A0F] border border-[#202028] rounded-md px-3 py-2 text-white focus:outline-none focus:border-[#00E5A0]"
-            />
+            {status === 'success' ? (
+              <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                className="flex flex-col items-center justify-center text-center py-6"
+              >
+                <div className="font-serif italic text-2xl md:text-[28px] text-[var(--color-savings)] mb-2">
+                  ↗ Check your inbox.
+                </div>
+                <div className="font-sans text-[15px] text-[var(--color-muted)]">
+                  Your report is on its way.
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <h3 className="font-sans font-medium text-[20px] text-[var(--color-ink)] mb-1">
+                  Save your audit report
+                </h3>
+                <p className="font-sans text-[14px] text-[var(--color-muted)] mb-8 max-w-[480px]">
+                  We'll email you the full breakdown plus flag any new savings as pricing changes.
+                </p>
+
+                <form onSubmit={handleSubmit}>
+                  <div className="flex flex-col md:flex-row gap-6 mb-8">
+                    <div className="flex-1 flex flex-col gap-1">
+                      <label className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-muted)]">Work email *</label>
+                      <input 
+                        name="email" type="email" required 
+                        className="w-full font-sans text-sm text-[var(--color-ink)] bg-transparent border-b border-[var(--color-muted)]/40 pb-1 focus:outline-none focus:border-[var(--color-accent)] focus:border-b-2 rounded-none transition-colors"
+                      />
+                    </div>
+                    <div className="flex-1 flex flex-col gap-1">
+                      <label className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-muted)]">Company (optional)</label>
+                      <input 
+                        name="company" type="text" 
+                        className="w-full font-sans text-sm text-[var(--color-ink)] bg-transparent border-b border-[var(--color-muted)]/40 pb-1 focus:outline-none focus:border-[var(--color-accent)] focus:border-b-2 rounded-none transition-colors"
+                      />
+                    </div>
+                    <div className="flex-1 flex flex-col gap-1">
+                      <label className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-muted)]">Role (optional)</label>
+                      <input 
+                        name="role" type="text" 
+                        className="w-full font-sans text-sm text-[var(--color-ink)] bg-transparent border-b border-[var(--color-muted)]/40 pb-1 focus:outline-none focus:border-[var(--color-accent)] focus:border-b-2 rounded-none transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="font-mono text-[11px] text-[var(--color-muted)] max-w-[320px]">
+                      Credex may follow up for audits showing &gt;$500/mo in savings. Unsubscribe anytime.
+                    </div>
+                    <button 
+                      type="submit" 
+                      disabled={status === 'loading'}
+                      className="w-full md:w-auto bg-[var(--color-ink)] text-[var(--color-paper)] font-sans font-medium text-[15px] px-8 py-3 rounded-none hover:bg-[var(--color-accent)] transition-colors duration-150 disabled:opacity-70"
+                    >
+                      {status === 'loading' ? 'Sending...' : status === 'error' ? 'Error. Try again.' : 'Send My Report →'}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Company Name <span className="text-gray-500 font-normal">(Optional)</span></label>
-            <input 
-              type="text" 
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              placeholder="Acme Corp"
-              className="w-full bg-[#0A0A0F] border border-[#202028] rounded-md px-3 py-2 text-white focus:outline-none focus:border-[#00E5A0]"
-            />
-          </div>
-          
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full bg-[#00E5A0] hover:bg-[#00D090] text-[#0A0A0F] font-bold py-3 px-4 rounded-md flex items-center justify-center gap-2 transition-colors mt-2 disabled:opacity-70"
-          >
-            {loading ? 'Saving...' : 'Send My Report'}
-            {!loading && <ArrowRight className="w-4 h-4" />}
-          </button>
-          
-          <p className="text-xs text-center text-gray-500 mt-4">
-            We&apos;ll never share your data. Unsubscribe anytime.
-          </p>
-        </form>
-      </div>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
