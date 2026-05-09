@@ -45,7 +45,7 @@ function HeroTicker() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.4, ease: "easeOut" as const }}
             className="border border-[var(--color-rule)] bg-[var(--color-paper)] p-5 rounded-2xl shadow-soft"
           >
             <div className="flex justify-between items-start mb-3">
@@ -190,7 +190,7 @@ export default function Home() {
   };
   const itemVariants = {
     hidden: { opacity: 0, y: 24 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } }
+    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } }
   };
 
   if (!isClient) return null;

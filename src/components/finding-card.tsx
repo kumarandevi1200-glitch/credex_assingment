@@ -10,7 +10,7 @@ export function FindingCard({ finding }: { finding: AuditFinding }) {
         <div>
           <h4 className="font-sans font-bold text-[17px] text-[var(--color-ink)] mb-1">{finding.toolName}</h4>
           <div className="font-mono text-[12px] text-[var(--color-muted)]">
-            {finding.currentSeats} seats · ${finding.currentSpend}/mo
+            Plan: {finding.currentPlan} · ${finding.currentMonthlySpend}/mo
           </div>
         </div>
 
@@ -51,8 +51,8 @@ export function FindingCard({ finding }: { finding: AuditFinding }) {
         <div className="mt-3 text-right">
           <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-muted)]">
             confidence: 
-            <span className={`ml-2 ${finding.confidence === 'HIGH' ? 'text-[var(--color-savings)]' : finding.confidence === 'MEDIUM' ? 'text-[#F5A623]' : 'text-[var(--color-warn)]'}`}>
-              ● {finding.confidence}
+            <span className={`ml-2 ${finding.confidenceLevel === 'high' ? 'text-[var(--color-savings)]' : finding.confidenceLevel === 'medium' ? 'text-[#F5A623]' : 'text-[var(--color-warn)]'}`}>
+              ● {finding.confidenceLevel.toUpperCase()}
             </span>
           </span>
         </div>

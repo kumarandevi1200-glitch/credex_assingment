@@ -114,7 +114,7 @@ export function ResultsClientContent({ shareId, data, result, isOptimal }: any) 
                 key={idx}
                 variants={{
                   hidden: { opacity: 0, y: 16 },
-                  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } }
+                  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } }
                 }}
               >
                 <FindingCard finding={finding} />

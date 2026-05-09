@@ -64,7 +64,7 @@ export function EmailGate({ auditId, isOptimal }: { auditId: string; isOptimal: 
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.4, ease: "easeOut" as const }}
           className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-paper)] border-t border-[var(--color-rule)] shadow-2xl"
           style={{ maxHeight: '320px' }}
         >
