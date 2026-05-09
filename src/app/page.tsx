@@ -8,6 +8,9 @@ import { UserToolInput } from '@/lib/audit-engine';
 import { toast } from 'sonner';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import * as Select from '@radix-ui/react-select';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 // Ticker Component for the Hero
 const TICKER_DATA = [
@@ -86,65 +89,91 @@ export default function Home() {
   const navBg = useTransform(scrollY, [0, 100], ['rgba(245, 240, 232, 0)', 'rgba(245, 240, 232, 0.9)']);
   const navBorder = useTransform(scrollY, [0, 100], ['rgba(212, 207, 195, 0)', 'rgba(212, 207, 195, 1)']);
   
-  // Form State
-  const [teamSize, setTeamSize] = useState<number>(1);
-  const [useCase, setUseCase] = useState<'coding' | 'writing' | 'data' | 'research' | 'mixed'>('mixed');
-  const [toolsState, setToolsState] = useState<Record<string, { enabled: boolean; planId: string; seats: number; monthlySpend: number }>>({});
+  // Form State via React Hook Form & Zod
   const [isClient, setIsClient] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const FormSchema = z.object({
+    teamSize: z.number().min(1),
+    useCase: z.enum(['coding', 'writing', 'data', 'research', 'mixed']),
+    website: z.string().optional(),
+    toolsState: z.record(
+      z.object({
+        enabled: z.boolean(),
+        planId: z.string(),
+        seats: z.number().min(1),
+        monthlySpend: z.number().min(0)
+      })
+    )
+  });
+
+  const { watch, setValue, handleSubmit: rhfSubmit, reset, register } = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: { teamSize: 1, useCase: 'mixed', toolsState: {} }
+  });
+
+  const teamSize = watch('teamSize');
+  const useCase = watch('useCase');
+  const toolsState = watch('toolsState');
+
+  type ToolStateObj = { enabled: boolean; planId: string; seats: number; monthlySpend: number };
+
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsClient(true);
     const saved = localStorage.getItem('spendlens_form');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (parsed.teamSize) setTeamSize(parsed.teamSize);
-        if (parsed.useCase) setUseCase(parsed.useCase);
-        if (parsed.toolsState) {
-          setToolsState(parsed.toolsState);
+        if (parsed.teamSize || parsed.toolsState) {
+          // @ts-ignore
+          reset({ 
+            teamSize: parsed.teamSize || 1, 
+            useCase: parsed.useCase || 'mixed', 
+            toolsState: parsed.toolsState || {} 
+          });
           return;
         }
       } catch { }
     }
     
-    const initial: Record<string, any> = {};
+    const initial: Record<string, ToolStateObj> = {};
     Object.keys(PRICING_DATA).forEach(id => {
       const tool = PRICING_DATA[id];
       const defaultPlanId = Object.keys(tool.plans)[0];
       initial[id] = { enabled: false, planId: defaultPlanId, seats: 1, monthlySpend: tool.plans[defaultPlanId]?.pricePerSeat || 0 };
     });
-    setToolsState(initial);
-  }, []);
+    setValue('toolsState', initial as any);
+  }, [reset, setValue]);
 
   useEffect(() => {
-    if (isClient && Object.keys(toolsState).length > 0) {
+    if (isClient && toolsState && Object.keys(toolsState).length > 0) {
       localStorage.setItem('spendlens_form', JSON.stringify({ teamSize, useCase, toolsState }));
     }
   }, [teamSize, useCase, toolsState, isClient]);
 
   const handleToolUpdate = (toolId: string, field: string, value: string | number | boolean) => {
-    setToolsState(prev => {
-      const next = { ...prev };
-      const current = next[toolId];
-      let newSpend = current.monthlySpend;
-      
-      if (field === 'planId' || field === 'seats') {
-        const pId = (field === 'planId' ? value : current.planId) as string;
-        const s = (field === 'seats' ? value : current.seats) as number;
-        const price = PRICING_DATA[toolId].plans[pId]?.pricePerSeat || 0;
-        newSpend = price * s;
-      }
-      
-      next[toolId] = { ...current, [field]: value, ...(field === 'planId' || field === 'seats' ? { monthlySpend: newSpend } : {}) };
-      return next;
-    });
+    const stateRecord = toolsState as Record<string, ToolStateObj> | undefined;
+    const current = stateRecord?.[toolId];
+    if (!current) return;
+    
+    let newSpend = current.monthlySpend;
+    if (field === 'planId' || field === 'seats') {
+      const pId = (field === 'planId' ? value : current.planId) as string;
+      const s = (field === 'seats' ? value : current.seats) as number;
+      const price = PRICING_DATA[toolId].plans[pId]?.pricePerSeat || 0;
+      newSpend = price * s;
+    }
+    
+    setValue(`toolsState.${toolId}`, { 
+      ...current, 
+      [field]: value, 
+      ...(field === 'planId' || field === 'seats' ? { monthlySpend: newSpend } : {}) 
+    } as any);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const activeTools = Object.keys(toolsState).filter(id => toolsState[id].enabled);
+  const onSubmitForm = async (data: z.infer<typeof FormSchema>) => {
+    const stateRecord = data.toolsState as Record<string, ToolStateObj>;
+    const activeTools = Object.keys(stateRecord).filter(id => stateRecord[id].enabled);
     if (activeTools.length === 0) {
       toast.error("Please select at least one tool to audit.");
       return;
@@ -152,37 +181,36 @@ export default function Home() {
     setIsSubmitting(true);
     const payloadTools: UserToolInput[] = activeTools.map(id => ({
       toolId: id,
-      planId: toolsState[id].planId,
-      seats: toolsState[id].seats,
-      monthlySpend: toolsState[id].monthlySpend,
-      useCase: useCase
+      planId: stateRecord[id].planId,
+      seats: stateRecord[id].seats,
+      monthlySpend: stateRecord[id].monthlySpend,
+      useCase: data.useCase as any
     }));
-    const form = e.target as HTMLFormElement;
-    const website = (form.elements.namedItem('website') as HTMLInputElement)?.value;
 
     try {
       const res = await fetch('/api/audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tools: payloadTools, teamSize, useCase, website })
+        body: JSON.stringify({ tools: payloadTools, teamSize: data.teamSize, useCase: data.useCase, website: data.website })
       });
       if (!res.ok) throw new Error('Failed to audit');
-      const data = await res.json();
-      if (data.fake) {
+      const apiData = await res.json();
+      if (apiData.fake) {
         toast.success("Audit complete!");
         setIsSubmitting(false);
         return;
       }
-      router.push(`/audit/${data.shareId}`);
+      router.push(`/audit/${apiData.shareId}`);
     } catch {
       toast.error("Something went wrong processing your audit.");
       setIsSubmitting(false);
     }
   };
 
-  const totalMonthlyCalculated = Object.keys(toolsState)
-    .filter(id => toolsState[id].enabled)
-    .reduce((sum, id) => sum + toolsState[id].monthlySpend, 0);
+  const typedToolsState = toolsState as Record<string, ToolStateObj> | undefined;
+  const totalMonthlyCalculated = typedToolsState ? Object.keys(typedToolsState)
+    .filter(id => typedToolsState[id].enabled)
+    .reduce((sum, id) => sum + typedToolsState[id].monthlySpend, 0) : 0;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -316,12 +344,12 @@ export default function Home() {
               </p>
             </motion.div>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={rhfSubmit(onSubmitForm)}>
               {/* STEP 1 */}
               <div className="flex flex-col md:flex-row gap-8 mb-12">
                 <div className="flex flex-col gap-2 w-full md:w-64">
                   <label className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-muted)]">Team Size</label>
-                  <Select.Root value={teamSize.toString()} onValueChange={(v) => setTeamSize(parseInt(v))}>
+                  <Select.Root value={teamSize?.toString() || '1'} onValueChange={(v) => setValue('teamSize', parseInt(v))}>
                     <Select.Trigger className="flex items-center justify-between w-full font-sans text-base text-[var(--color-paper)] bg-transparent border-b border-[var(--color-muted)]/40 pb-2 focus:outline-none focus:border-[var(--color-savings)] rounded-none">
                       <Select.Value />
                       <Select.Icon className="font-mono text-[var(--color-muted)]">▾</Select.Icon>
@@ -342,7 +370,7 @@ export default function Home() {
                 
                 <div className="flex flex-col gap-2 w-full md:w-64">
                   <label className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-muted)]">Primary Use Case</label>
-                  <Select.Root value={useCase} onValueChange={(v: any) => setUseCase(v)}>
+                  <Select.Root value={useCase || 'mixed'} onValueChange={(v: any) => setValue('useCase', v)}>
                     <Select.Trigger className="flex items-center justify-between w-full font-sans text-base text-[var(--color-paper)] bg-transparent border-b border-[var(--color-muted)]/40 pb-2 focus:outline-none focus:border-[var(--color-savings)] rounded-none">
                       <Select.Value />
                       <Select.Icon className="font-mono text-[var(--color-muted)]">▾</Select.Icon>
@@ -373,13 +401,13 @@ export default function Home() {
                   <ToolCard 
                     key={toolId}
                     toolId={toolId}
-                    enabled={toolsState[toolId]?.enabled || false}
+                    enabled={typedToolsState?.[toolId]?.enabled || false}
                     onToggle={(enabled) => handleToolUpdate(toolId, 'enabled', enabled)}
-                    planId={toolsState[toolId]?.planId || ''}
+                    planId={typedToolsState?.[toolId]?.planId || ''}
                     onPlanChange={(planId) => handleToolUpdate(toolId, 'planId', planId)}
-                    seats={toolsState[toolId]?.seats || 1}
+                    seats={typedToolsState?.[toolId]?.seats || 1}
                     onSeatsChange={(seats) => handleToolUpdate(toolId, 'seats', seats)}
-                    monthlySpend={toolsState[toolId]?.monthlySpend || 0}
+                    monthlySpend={typedToolsState?.[toolId]?.monthlySpend || 0}
                     onSpendChange={(spend) => handleToolUpdate(toolId, 'monthlySpend', spend)}
                   />
                 ))}
@@ -388,12 +416,12 @@ export default function Home() {
               {/* STEP 3 - Submit */}
               <div className="pt-8 border-t border-[var(--color-muted)]/20 flex flex-col md:flex-row justify-between items-center gap-6">
                 <div className="font-mono text-[13px] text-[var(--color-paper)]">
-                  {Object.keys(toolsState).filter(id => toolsState[id].enabled).length} tools selected · {
-                    Object.keys(toolsState).filter(id => toolsState[id].enabled).reduce((sum, id) => sum + toolsState[id].seats, 0)
+                  {typedToolsState ? Object.keys(typedToolsState).filter(id => typedToolsState[id].enabled).length : 0} tools selected · {
+                    typedToolsState ? Object.keys(typedToolsState).filter(id => typedToolsState[id].enabled).reduce((sum, id) => sum + typedToolsState[id].seats, 0) : 0
                   } seats · est. ${totalMonthlyCalculated}/mo
                 </div>
                 
-                <input name="website" type="text" tabIndex={-1} aria-hidden="true" className="absolute left-[-9999px] opacity-0" />
+                <input {...register('website')} type="text" tabIndex={-1} aria-hidden="true" className="absolute left-[-9999px] opacity-0" />
 
                 <div className="w-full md:w-auto">
                   {isSubmitting ? (

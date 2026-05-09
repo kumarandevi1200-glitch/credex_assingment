@@ -38,7 +38,17 @@ export function ToolCard({
       }`}
     >
       <div 
-        className="flex items-center justify-between p-5 cursor-pointer"
+        role="switch"
+        aria-checked={enabled}
+        aria-label={`Toggle ${tool.name} tool`}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle(!enabled);
+          }
+        }}
+        className="flex items-center justify-between p-5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-savings)]"
         onClick={() => onToggle(!enabled)}
       >
         <div className="flex items-center gap-4">

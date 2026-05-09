@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, DM_Mono, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from 'sonner';
+import { CSPostHogProvider } from '@/components/posthog-provider';
 
 const playfair = Playfair_Display({ 
   subsets: ["latin"], 
@@ -35,8 +36,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${playfair.variable} ${dmMono.variable} ${instrumentSans.variable} font-sans min-h-screen selection:bg-accent selection:text-white`}>
-        {children}
-        <Toaster theme="light" />
+        <CSPostHogProvider>
+          {children}
+          <Toaster theme="light" />
+        </CSPostHogProvider>
       </body>
     </html>
   );
