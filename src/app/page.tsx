@@ -98,6 +98,7 @@ export default function Home() {
     useCase: z.enum(['coding', 'writing', 'data', 'research', 'mixed']),
     website: z.string().optional(),
     toolsState: z.record(
+      z.string(),
       z.object({
         enabled: z.boolean(),
         planId: z.string(),
@@ -125,10 +126,9 @@ export default function Home() {
       try {
         const parsed = JSON.parse(saved);
         if (parsed.teamSize || parsed.toolsState) {
-          // @ts-ignore
           reset({ 
             teamSize: parsed.teamSize || 1, 
-            useCase: parsed.useCase || 'mixed', 
+            useCase: (parsed.useCase || 'mixed') as "coding" | "writing" | "data" | "research" | "mixed", 
             toolsState: parsed.toolsState || {} 
           });
           return;
@@ -142,7 +142,7 @@ export default function Home() {
       const defaultPlanId = Object.keys(tool.plans)[0];
       initial[id] = { enabled: false, planId: defaultPlanId, seats: 1, monthlySpend: tool.plans[defaultPlanId]?.pricePerSeat || 0 };
     });
-    setValue('toolsState', initial as any);
+    setValue('toolsState', initial);
   }, [reset, setValue]);
 
   useEffect(() => {
@@ -164,11 +164,13 @@ export default function Home() {
       newSpend = price * s;
     }
     
-    setValue(`toolsState.${toolId}`, { 
+    const updatedValue = { 
       ...current, 
       [field]: value, 
       ...(field === 'planId' || field === 'seats' ? { monthlySpend: newSpend } : {}) 
-    } as any);
+    } as ToolStateObj;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setValue(`toolsState.${toolId}` as any, updatedValue as any);
   };
 
   const onSubmitForm = async (data: z.infer<typeof FormSchema>) => {
@@ -184,7 +186,7 @@ export default function Home() {
       planId: stateRecord[id].planId,
       seats: stateRecord[id].seats,
       monthlySpend: stateRecord[id].monthlySpend,
-      useCase: data.useCase as any
+      useCase: data.useCase as "coding" | "writing" | "data" | "research" | "mixed"
     }));
 
     try {
@@ -270,7 +272,7 @@ export default function Home() {
                 Your AI tools<br />
                 are <span className="text-[var(--color-warn)]">billing</span> you<br />
                 for things you<br />
-                don't use.
+                don&apos;t use.
               </motion.h1>
               
               <motion.p variants={itemVariants} className="mt-8 font-sans text-[18px] text-[var(--color-muted)] max-w-[420px] leading-relaxed">
@@ -282,7 +284,7 @@ export default function Home() {
                   href="#audit-form"
                   className="inline-block bg-[var(--color-ink)] text-[var(--color-paper)] font-sans font-medium text-[15px] px-8 py-4 rounded-xl hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  Audit My Stack — It's Free
+                  Audit My Stack — It&apos;s Free
                 </a>
                 <p className="mt-4 font-mono text-[11px] text-[var(--color-muted)]">No account. No credit card. 2 minutes.</p>
               </motion.div>
@@ -370,7 +372,7 @@ export default function Home() {
                 
                 <div className="flex flex-col gap-2 w-full md:w-64">
                   <label className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-muted)]">Primary Use Case</label>
-                  <Select.Root value={useCase || 'mixed'} onValueChange={(v: any) => setValue('useCase', v)}>
+                  <Select.Root value={useCase || 'mixed'} onValueChange={(v: "coding" | "writing" | "data" | "research" | "mixed") => setValue('useCase', v)}>
                     <Select.Trigger className="flex items-center justify-between w-full font-sans text-base text-[var(--color-paper)] bg-transparent border-b border-[var(--color-muted)]/40 pb-2 focus:outline-none focus:border-[var(--color-savings)] rounded-none">
                       <Select.Value />
                       <Select.Icon className="font-mono text-[var(--color-muted)]">▾</Select.Icon>

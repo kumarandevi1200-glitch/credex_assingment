@@ -29,7 +29,6 @@ export function ToolCard({
   if (!tool) return null;
 
   const currentPlan = tool.plans[planId] || tool.plans[Object.keys(tool.plans)[0]];
-  const defaultSpend = currentPlan.pricePerSeat * seats;
 
   return (
     <div 

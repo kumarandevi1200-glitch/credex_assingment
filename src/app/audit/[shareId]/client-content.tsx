@@ -3,11 +3,24 @@
 import { CountUp } from '@/components/count-up';
 import { FindingCard } from '@/components/finding-card';
 import { EmailGate } from '@/components/email-gate';
-import { AuditFinding } from '@/lib/audit-engine';
+import { AuditFinding, AuditResult } from '@/lib/audit-engine';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import Link from 'next/link';
 
-export function ResultsClientContent({ shareId, data, result, isOptimal }: any) {
+interface AuditData {
+  id: string;
+  ai_summary: string;
+}
+
+interface ResultsClientContentProps {
+  shareId: string;
+  data: AuditData;
+  result: AuditResult;
+  isOptimal: boolean;
+}
+
+export function ResultsClientContent({ shareId, data, result, isOptimal }: ResultsClientContentProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -37,9 +50,9 @@ export function ResultsClientContent({ shareId, data, result, isOptimal }: any) 
 
         {/* Top Nav */}
         <div className="relative z-10 flex justify-between items-center px-8 py-6 max-w-[1280px] w-full mx-auto">
-          <a href="/" className="font-mono text-[12px] text-[var(--color-paper)]/70 hover:text-[var(--color-paper)] transition-colors">
+          <Link href="/" className="font-mono text-[12px] text-[var(--color-paper)]/70 hover:text-[var(--color-paper)] transition-colors">
             ← New Audit
-          </a>
+          </Link>
           <button onClick={handleCopy} className="font-mono text-[12px] text-[var(--color-paper)]/70 hover:text-[var(--color-paper)] transition-colors">
             Share This Report
           </button>
@@ -59,7 +72,7 @@ export function ResultsClientContent({ shareId, data, result, isOptimal }: any) 
               <CountUp end={result.totalMonthlySavings} prefix="$" />
             </div>
             <div className="font-mono text-[16px] text-[var(--color-savings)] mt-4">
-              · that's ${result.totalAnnualSavings.toLocaleString()} every year ·
+              · that&apos;s ${result.totalAnnualSavings.toLocaleString()} every year ·
             </div>
           </div>
 
@@ -159,7 +172,7 @@ export function ResultsClientContent({ shareId, data, result, isOptimal }: any) 
             <div>
               <div className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--color-warn)] mb-4">SIGNIFICANT OVERSPEND DETECTED</div>
               <h2 className="font-serif italic text-4xl md:text-[42px] text-[var(--color-ink)] leading-[1.1] mb-6">
-                You're leaving ${result.totalAnnualSavings.toLocaleString()}<br />
+                You&apos;re leaving ${result.totalAnnualSavings.toLocaleString()}<br />
                 on the table this year.
               </h2>
               <p className="font-sans text-[16px] text-[var(--color-muted)] max-w-[440px] leading-relaxed mb-8">
@@ -169,7 +182,7 @@ export function ResultsClientContent({ shareId, data, result, isOptimal }: any) 
               <button className="bg-[var(--color-ink)] text-[var(--color-paper)] font-sans font-medium text-[18px] px-10 py-4 hover:bg-[var(--color-accent)] transition-colors duration-150 rounded-none w-full sm:w-auto">
                 Book a Free 20-min Call →
               </button>
-              <p className="mt-3 font-mono text-[11px] text-[var(--color-muted)]">No obligation. We'll tell you honestly if we can help.</p>
+              <p className="mt-3 font-mono text-[11px] text-[var(--color-muted)]">No obligation. We&apos;ll tell you honestly if we can help.</p>
             </div>
 
             <div className="bg-[var(--color-paper-dim)] border border-[var(--color-rule)] p-8">
@@ -204,10 +217,10 @@ export function ResultsClientContent({ shareId, data, result, isOptimal }: any) 
       ) : isOptimal && (
         <section className="bg-[var(--color-paper-dim)] py-20 px-8">
           <div className="max-w-[640px] mx-auto text-center">
-            <h2 className="font-serif italic text-3xl md:text-[36px] text-[var(--color-ink)] mb-4">You're spending well. Seriously.</h2>
+            <h2 className="font-serif italic text-3xl md:text-[36px] text-[var(--color-ink)] mb-4">You&apos;re spending well. Seriously.</h2>
             <p className="font-sans text-[16px] text-[var(--color-muted)] mb-10 leading-relaxed">
               Your stack is lean and well-matched to your team size. 
-              We found no significant savings this round. That's actually good news.
+              We found no significant savings this round. That&apos;s actually good news.
             </p>
             
             <form className="flex flex-col items-center gap-2" onSubmit={(e) => e.preventDefault()}>

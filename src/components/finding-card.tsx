@@ -46,7 +46,7 @@ export function FindingCard({ finding }: { finding: AuditFinding }) {
       {/* Reasoning Row */}
       <div className="mt-2 pt-4 border-t-[0.5px] border-[var(--color-rule)]/50 ml-0 md:ml-[30%]">
         <p className="font-sans italic text-[14px] text-[var(--color-muted)] leading-[1.6]">
-          "{finding.reasoning}"
+          &ldquo;{finding.reasoning}&rdquo;
         </p>
         <div className="mt-3 text-right">
           <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-muted)]">

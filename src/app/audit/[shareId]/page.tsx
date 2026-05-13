@@ -1,10 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getSupabaseServer } from '@/lib/supabase';
-import { CountUp } from '@/components/count-up';
-import { FindingCard } from '@/components/finding-card';
-import { EmailGate } from '@/components/email-gate';
-import { AuditFinding } from '@/lib/audit-engine';
 
 export async function generateMetadata({ params }: { params: Promise<{ shareId: string }> }): Promise<Metadata> {
   const supabase = getSupabaseServer();

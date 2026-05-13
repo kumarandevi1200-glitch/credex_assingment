@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export function EmailGate({ auditId, isOptimal }: { auditId: string; isOptimal: boolean }) {
+export function EmailGate({ auditId, isOptimal: _isOptimal }: { auditId: string; isOptimal: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [isDismissed, setIsDismissed] = useState(false);
@@ -96,7 +96,7 @@ export function EmailGate({ auditId, isOptimal }: { auditId: string; isOptimal: 
                   Save your audit report
                 </h3>
                 <p className="font-sans text-[14px] text-[var(--color-muted)] mb-8 max-w-[480px]">
-                  We'll email you the full breakdown plus flag any new savings as pricing changes.
+                  We&apos;ll email you the full breakdown plus flag any new savings as pricing changes.
                 </p>
 
                 <form onSubmit={handleSubmit}>
